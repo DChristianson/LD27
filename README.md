@@ -46,19 +46,19 @@ rewind 10 seconds
 
 10 second replay
 
-** Game **
+**Game**
 
 Infiltrator 2PS
 
-** Genre **
+**Genre**
 
 Run and Gun
 
-** Perspective **
+**Perspective**
 
 Isometric
 
-** Verbs **
+**Verbs**
 
 Wait
 
@@ -84,7 +84,7 @@ Patrol
 
 Exit
 
-** Objects **
+**Objects**
 
 Player
 
@@ -110,13 +110,13 @@ Codec
 
 Exit
 
-** Awards **
+**Awards**
 
 Ghost - unseen
 
 Cleaner - eliminate all enemies
 
-** Components **
+**Components**
 
 Title Screen
 
@@ -128,9 +128,13 @@ Play Screen
 
 Interstitial
 
+Success
+
+Game Over
+
 Goal Processor
 
-** Stages **
+**Stages**
 
 No Guard
 
