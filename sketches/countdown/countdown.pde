@@ -14,12 +14,17 @@ public void draw() {
      start = millis();
    }
    background(64);
+   
    long deltaTime = (millis() - start);
    time = 10 - (float) deltaTime / 1000 ;
    if (time < 0) {
      start = millis();
    } else {
      textAlign(CENTER); 
-     text(time, width / 2, height / 2);
+     text(ceil(time), width / 2, height * 3 / 4);
    }
+   
+   textAlign(CENTER); 
+   text("Infiltrators", width / 2, height / 2);
+
 }
