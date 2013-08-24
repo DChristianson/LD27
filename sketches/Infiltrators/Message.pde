@@ -1,11 +1,13 @@
 class Message {
   
   String text;
+  boolean modal;
   float timeLeft;
   Message next;
  
-  public Message(String text) {
+  public Message(String text, boolean modal) {
     this.text = text;
+    this.modal = modal;
     this.timeLeft = MAX_TALK_TIME;
   }
  

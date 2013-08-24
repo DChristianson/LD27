@@ -30,7 +30,7 @@ class Radio {
     if (!isActive()) return;
     
     next.decrement(deltaTimeInSeconds);
-    if (!(next.timeLeft > 0)) {
+    if (!(next.timeLeft > 0) || (next.modal && click)) {
       next = next.next;
     }
     
@@ -42,10 +42,16 @@ class Radio {
   
   public void draw() {
     stroke(255);
+    pushMatrix();
+    translate(width - 20, 0);
     line(0, 0, 20, 20); 
     line(0, 20, 20, 0); 
+    popMatrix();
     if (isActive()) {
       text(next.text, width / 2, height / 2); 
+      if (next.modal) {
+        text("<click to continue>", width / 2, height / 2 + 12);        
+      }
     }
   }
   

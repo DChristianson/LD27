@@ -1,4 +1,13 @@
 
+int MAP_WIDTH = 32;
+int MAP_HEIGHT = 32;
+int MAP_SCALE = 10;
+
+int TILE_EMPTY = 0;
+int TILE_WALL = 1;
+int TILE_ENTRANCE = 2;
+int TILE_EXIT = 3;
+
 int AGENTS_NORMAL = 3;
 float MAX_TALK_TIME = 10;
 
