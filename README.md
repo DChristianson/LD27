@@ -5,37 +5,32 @@
 **Ideas**
 
 10 2nd
+
 Ten2nds
 
-second person perspective
+10 steps in the right order
 
-Caesium fountain
+second person perspective
 
 assistant
 
 sealed move
 
-player swap
-
 adjournment
+
+player swap
 
 Follow the leader
 
-360 degrees per 2PI
-60 minutes per degree 2PI / 360 * 60 
-60 seconds per minute 2PI / 360 * 3600
-
-Stimulus 10 seconds
-
 10 seconds of air
-
-Countdown clock
 
 10 seconds of light
 
-second division
-
 10 seconds dark
+
+Countdown clock
+
+second division
 
 Clock time
 
@@ -45,29 +40,104 @@ Bullet time
 
 free fall for 10 seconds
 
-10 seconds recording
-
-10 seconds exposure
-
-10 steps in the right order
-
-10 second helpings
-
-10 seconds behind
-
 10 second fuse
-
-10 seconds of a degree
-
-10 seconds hex
-
-10 seconds binary
-
-10 seconds no hands on the wheel
-
-10 seconds to the top
 
 rewind 10 seconds
 
 10 second replay
 
+** Game **
+
+Infiltrator 2PS
+
+** Genre **
+
+Run and Gun
+
+** Perspective **
+
+Isometric
+
+** Verbs **
+
+Wait
+
+Move To
+
+Takedown
+
+Sharpshooter
+
+Hide
+
+Markdown
+
+Plant
+
+Spray
+
+Grenade
+
+Codec
+
+Patrol
+
+Exit
+
+** Objects **
+
+Player
+
+Guard
+
+Camera
+
+Wall
+
+Door
+
+Floor
+
+Clock
+
+Suitcase
+
+Target
+
+View
+
+Codec
+
+Exit
+
+** Awards **
+
+Ghost - unseen
+
+Cleaner - eliminate all enemies
+
+** Components **
+
+Title Screen
+
+Map Generator
+
+Codec Screen
+
+Play Screen
+
+Interstitial
+
+Goal Processor
+
+** Stages **
+
+No Guard
+
+1 Guard
+
+1 Guard on Patrol
+
+1 Patrol, 1 Guard
+
+Suitcase + Guard
