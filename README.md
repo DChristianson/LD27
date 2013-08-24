@@ -48,11 +48,11 @@ rewind 10 seconds
 
 **Game**
 
-Infiltrator 2PS
+Infiltrators
 
 **Genre**
 
-Run and Gun
+2PS Run and Gun
 
 **Perspective**
 
