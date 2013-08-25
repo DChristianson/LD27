@@ -9,13 +9,21 @@ class Radio {
   public void setup() {
 
   }
+
+  public void reset() {
+    talkTime = 0;  
+  }
   
   public boolean isModal() {
     return null != next && next.modal;  
   }
 
+  public boolean isOverLimit() {
+    return talkTime > MAX_TALK_TIME;  
+  }
+
   public boolean isActive() {
-    return null != next;  
+    return (null != next); 
   }
   
   public void add(Message message) {
@@ -35,6 +43,7 @@ class Radio {
       talkTime += deltaTimeInSeconds;
       totalTalkTime += deltaTimeInSeconds;
     }
+
     next.decrement(deltaTimeInSeconds);
     if (!(next.timeLeft > 0)) {
       next = next.next;

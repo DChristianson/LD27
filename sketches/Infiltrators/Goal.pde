@@ -6,6 +6,10 @@ class Goal {
   Goal next; 
     
   public void execute(Agent agent, float deltaTimeInSeconds) {}
+  
+  public void seesOpponent(Agent agent) {
+    float("sees opponent");  
+  }
 
   public void draw() {}
 

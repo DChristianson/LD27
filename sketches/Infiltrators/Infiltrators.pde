@@ -23,6 +23,7 @@ Credits credits;
 Level level;
 Radio radio;
 Agent agent;
+Guard guard;
 
 
 Screen screen;

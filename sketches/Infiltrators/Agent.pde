@@ -5,7 +5,9 @@ class Agent {
   PVector velocity = new PVector();
   float heading = - PI / 2;
   float patience = 75;
-
+  int teamColor;
+  boolean active = false;
+  
   Goal nextMissionGoal;
   Goal lastMissionGoal;
   
@@ -15,6 +17,7 @@ class Agent {
   
   public void setup() {
     name = "Agent " + ((int) random(100));
+    teamColor = color(255, 255, 255, 255);
   }
   
   public void update(float deltaTimeInSeconds) {
@@ -104,8 +107,8 @@ class Agent {
     rotate(heading);    
     scale(0.5);
     strokeWeight(0.1);
-    stroke(255);
-    fill(200);
+    stroke(teamColor);
+    fill(64);
     ellipseMode(CENTER);
     ellipse(0, 0, 1, 1);
     line(.5, .5, 1, 0);

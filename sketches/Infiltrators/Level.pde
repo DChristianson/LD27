@@ -71,7 +71,6 @@ class Level {
     float ly = location.y + velocity.y * deltaTimeInSeconds;
     if (TILE_WALL == getTile(playfield, (int) (lx - radius), (int) ly)) {
       lx = ceil(lx - 1) + radius;
-      println("hit left");
        
     }
     if (TILE_WALL == getTile(playfield, (int) (lx + radius), (int) ly)) {
@@ -187,7 +186,14 @@ class Level {
     }
     
     // draw agent on this map
-    agent.draw();
+    if (agent.active) {
+      agent.draw();
+    }
+    
+    // draw guard on this map
+    if (guard.active) {
+      guard.draw();
+    }
     
     popMatrix();
     
