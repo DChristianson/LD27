@@ -23,7 +23,7 @@ public boolean playfieldLineOfSight(int[] playfield, int fromI, int fromJ, int t
   float i = fromI;
   float j = fromJ;
   
-  for (int n = 0; n <= distance; n++) {
+  for (int n = 0; n < distance; n++) {
     i = i + ddx;
     j = j + ddy;
     int idx = indexOf((int) i, (int) j);

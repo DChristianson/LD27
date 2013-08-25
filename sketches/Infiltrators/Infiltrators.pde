@@ -62,7 +62,6 @@ public void draw() {
 boolean click = false;
 
 public void mouseReleased() {
-  println("mouse released");
   click = true; 
 }
 

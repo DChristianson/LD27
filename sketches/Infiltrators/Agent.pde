@@ -3,7 +3,7 @@ class Agent {
   String name;
   PVector location = new PVector();  
   PVector velocity = new PVector();
-  float heading = 0;
+  float heading = - PI / 2;
   float patience = 75;
 
   Goal nextMissionGoal;
@@ -51,7 +51,7 @@ class Agent {
       
     }
     
-    level.collide(location, velocity, 0.5, deltaTimeInSeconds);
+    level.collide(location, velocity, 0.25, deltaTimeInSeconds);
         
   }
   
@@ -86,20 +86,7 @@ class Agent {
   }
   
   public void draw() {
-    pushMatrix();
-    translate(location.x, location.y);
-    rotate(heading);
-    
-    scale(0.5);
-    strokeWeight(0.1);
-    stroke(255);
-    fill(200);
-    ellipseMode(CENTER);
-    ellipse(0, 0, 1, 1);
-    line(.5, .5, 1, 0);
-    line(1, 0, .5, -.5);
-    popMatrix(); 
-    
+        
     Goal goal = nextGoal;
     while (null != goal) {
       goal.draw();
@@ -112,6 +99,20 @@ class Agent {
       missionGoal = missionGoal.next;
     }
     
+    pushMatrix();
+    translate(location.x, location.y);
+    rotate(heading);    
+    scale(0.5);
+    strokeWeight(0.1);
+    stroke(255);
+    fill(200);
+    ellipseMode(CENTER);
+    ellipse(0, 0, 1, 1);
+    line(.5, .5, 1, 0);
+    line(1, 0, .5, -.5);
+    popMatrix(); 
+
+   
   }
   
 }

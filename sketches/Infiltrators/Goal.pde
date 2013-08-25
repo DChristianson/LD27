@@ -22,6 +22,7 @@ class MoveTo extends Goal {
   public void draw() {
     pushMatrix();
     translate(location.x, location.y);
+    strokeWeight(0.1);
     stroke(255);
     fill(200);
     ellipseMode(CENTER);
@@ -32,14 +33,75 @@ class MoveTo extends Goal {
   public void execute(Agent agent, float deltaTimeInSeconds) {
     direction.set(location);
     direction.sub(agent.location);
-    if (direction.mag() < .5) {
+    if (direction.mag() < .1) {
       completed = true; 
       agent.velocity.mult(0);
       
     } else {      
+      direction.normalize();
+      direction.mult(2.0);
       float desiredHeading = direction.heading();
       agent.velocity.lerp(direction, deltaTimeInSeconds);
-      agent.heading = lerp(agent.heading, desiredHeading, deltaTimeInSeconds);  
+      agent.heading = lerp(agent.heading, desiredHeading, 0.1);  
+      
+    }
+  }
+  
+}
+
+class Follow extends MoveTo {
+
+  Path path;
+  
+  public Follow(Path path) {
+    this.path = path;
+    Path end = path.getEnd();
+    location.set(end.i + 0.5, end.j + 0.5);
+  }
+  
+  public void draw() {
+    pushMatrix();
+    translate(location.x, location.y);
+    strokeWeight(0.1);
+    stroke(0, 255, 0);
+    fill(200);
+    ellipseMode(CENTER);
+    ellipse(0, 0, 0.5, 0.5);
+    popMatrix();
+
+    if (null != path) {
+      Path node = path;
+      float alpha = 255;
+      while (null != node) {
+        alpha *= 0.75;
+        pushMatrix();
+        translate(node.i + 0.5, node.j + 0.5);
+        stroke(255, 255, 255, alpha);
+        fill(200, 200, 200, alpha);
+        ellipseMode(CENTER);
+        ellipse(0, 0, 0.5, 0.5);
+        popMatrix();
+        node = node.child;
+      }
+    }
+    
+  }
+ 
+  public void execute(Agent agent, float deltaTimeInSeconds) {
+    direction.set(path.i + 0.5, path.j + 0.5);
+    direction.sub(agent.location);
+    if (direction.mag() < .1) {
+      path = path.child;
+      if (null == path) {
+        completed = true; 
+        agent.velocity.mult(0);
+      }
+      
+    } else {      
+      direction.normalize();
+      direction.mult(2.0);
+      agent.velocity.set(direction);
+      agent.heading = agent.velocity.heading();  
       
     }
   }
@@ -78,16 +140,6 @@ class Ask extends Goal {
     completed = true;
   }
   
-  public void draw() {
-    pushMatrix();
-    ellipseMode(CENTER);
-    translate(agent.location.x, agent.location.y);
-    stroke(0, 0, 255);
-    noFill();
-    ellipse(0, 0, 2, 2);
-    popMatrix();
-  }
-  
 }
 
 class Wait extends Goal {
@@ -112,7 +164,7 @@ class Wait extends Goal {
 class Breach extends Goal {
 
     public void execute(Agent agent, float deltaTimeInSeconds) {
-      completed = location.dist(agent.location) < .5;
+      completed = location.dist(agent.location) < .1;
     }
 
     public String getDescription() {
@@ -121,10 +173,11 @@ class Breach extends Goal {
   
     public void draw() {
       pushMatrix();
-      ellipseMode(CENTER);
       translate(location.x, location.y);
+      strokeWeight(0.1);
       stroke(0, 255, 0);
       noFill();
+      ellipseMode(CENTER);
       ellipse(0, 0, 2, 2);
       popMatrix();
     }
@@ -146,10 +199,63 @@ class Exit extends Goal {
   
     public void draw() {
       pushMatrix();
-      ellipseMode(CENTER);
       translate(location.x, location.y);
+      strokeWeight(0.1);
       stroke(255, 0, 0);
       noFill();
+      ellipseMode(CENTER);
+      ellipse(0, 0, 2, 2);
+      popMatrix();
+    }
+
+}
+
+/**
+ * Mission goal
+ */
+class Terminal extends Goal {
+
+    public void execute(Agent agent, float deltaTimeInSeconds) {
+      completed = location.dist(agent.location) < .1;
+    }
+
+    public String getDescription() {
+      return "Hack the terminal"; 
+    }
+  
+    public void draw() {
+      pushMatrix();
+      translate(location.x, location.y);
+      strokeWeight(0.1);
+      stroke(0, 0, 255);
+      noFill();
+      ellipseMode(CENTER);
+      ellipse(0, 0, 2, 2);
+      popMatrix();
+    }
+
+}
+
+/**
+ * Mission goal
+ */
+class Suitcase extends Goal {
+
+    public void execute(Agent agent, float deltaTimeInSeconds) {
+      completed = location.dist(agent.location) < .1;
+    }
+
+    public String getDescription() {
+      return "Get the suitcase"; 
+    }
+  
+    public void draw() {
+      pushMatrix();
+      translate(location.x, location.y);
+      strokeWeight(0.1);
+      stroke(0, 0, 255);
+      noFill();
+      ellipseMode(CENTER);
       ellipse(0, 0, 2, 2);
       popMatrix();
     }

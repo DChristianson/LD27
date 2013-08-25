@@ -13,6 +13,7 @@ class Level {
   float scale = 50;
   float cursorX;
   float cursorY;
+  Path path;
   boolean zoom = false;
   
   int[] playfield;
@@ -36,11 +37,10 @@ class Level {
     w = MAP_WIDTH * scale;
     h = MAP_HEIGHT * scale;    
                 
-    left = constrain((width / 2) - x * scale, width - rightMargin - w, leftMargin);
-    top = constrain((height / 2) - y * scale, height - bottomMargin - h, topMargin);
+    left = lerp(constrain((width / 2) - x * scale, width - rightMargin - w, leftMargin), left, 0.1);
+    top = lerp(constrain((height / 2) - y * scale, height - bottomMargin - h, topMargin), top, 0.1);
     bottom = top + h;
     right = left + w;
-
     
   }
   
@@ -67,21 +67,27 @@ class Level {
   }
   
   public void collide(PVector location, PVector velocity, float radius, float deltaTimeInSeconds) {
-    location.x += velocity.x * deltaTimeInSeconds;
-    location.y += velocity.y * deltaTimeInSeconds;
-    if (TILE_WALL == getTile(playfield, (int) (location.x - radius), (int) location.y)) {
-      location.x = ceil(location.y - 1) + radius;
+    float lx = location.x + velocity.x * deltaTimeInSeconds;
+    float ly = location.y + velocity.y * deltaTimeInSeconds;
+    if (TILE_WALL == getTile(playfield, (int) (lx - radius), (int) ly)) {
+      lx = ceil(lx - 1) + radius;
+      println("hit left");
        
-    } else if (TILE_WALL == getTile(playfield, (int) (location.x + radius), (int) location.y)) {
-      location.x = floor(location.x + 1) - radius;
+    }
+    if (TILE_WALL == getTile(playfield, (int) (lx + radius), (int) ly)) {
+      lx = floor(lx + 1) - radius;
 
-    } else if (TILE_WALL == getTile(playfield, (int) location.x, (int) (location.y - radius))) {
-      location.y = ceil(location.y + 1) + radius;
+    }
+    if (TILE_WALL == getTile(playfield, (int) lx, (int) (ly - radius))) {
+      ly = ceil(ly - 1) + radius;
        
-    } else if (TILE_WALL == getTile(playfield, (int) location.x, (int) (location.y + radius))) {
-      location.y = floor(location.y + 1) - radius;
+    }
+    if (TILE_WALL == getTile(playfield, (int) lx, (int) (ly + radius))) {
+      ly = floor(ly + 1) - radius;
       
     }
+    location.x = lx;
+    location.y = ly;
   }
   
   public void update(float deltaTimeInSeconds) {
@@ -91,22 +97,33 @@ class Level {
       // zoom by radio focus
       zoom = radio.next.zoom;
 
-    } else {
-      
-      // zoom click
-      if (mouseY < topMargin) {
-        if (click) {
-          zoom = !zoom;
-        }
-      }
-      
-    } 
-    
+    }
+          
     resize(agent.location.x, agent.location.y);
 
     cursorX = (mouseX - left) / scale;
     cursorY = (mouseY - top) / scale;
+         
+    if (!radio.isModal() && mouseX > (width / 2 - 50) && mouseX < (width / 2 + 50) && mouseY < topMargin && click) {
+      
+      // zoom click
+      zoom = !zoom;
+      
+    } else if (cursorX >= 0  && cursorX < MAP_WIDTH && cursorY >= 0 && cursorY < MAP_HEIGHT) {
+  
+        float targetX = floor(cursorX) + 0.5;
+        float targetY = floor(cursorY) + 0.5;
+        float sourceX = (null != agent.lastGoal) ? agent.lastGoal.location.x : agent.location.x;
+        float sourceY = (null != agent.lastGoal) ? agent.lastGoal.location.y : agent.location.y;
+        
+        path = searchPathTree(playfield, (int) sourceX, (int) sourceY, (int) targetX, (int) targetY, 20);
 
+        if (null != path && click) {
+          Follow follow = new Follow(path);
+          agent.add(follow); 
+        }
+
+    }  
   }
   
   public void draw() {
@@ -148,54 +165,41 @@ class Level {
         }
       }
     }
+
+    // draw path
+    if (!radio.isModal()) {
+      if (null != path) {
+        Path node = path.child;
+        float alpha = 255;
+        while (null != node) {
+          alpha *= 0.9;
+          pushMatrix();
+          strokeWeight(0.1);
+          stroke(255, 255, 255, alpha); 
+          fill(64, 64, 64, alpha); 
+          translate(node.i + 0.5, node.j + 0.5);
+          ellipseMode(CENTER);
+          ellipse(0, 0, 0.5, 0.5);
+          popMatrix();
+          node = node.child;
+        }
+      }
+    }
     
     // draw agent on this map
     agent.draw();
-
-    // check mouse
-    if (!radio.isModal()) {
-      
-      if (cursorX >= 0  && cursorX < MAP_WIDTH && cursorY >= 0 && cursorY < MAP_HEIGHT) {
-      
-        float targetX = floor(cursorX) + 0.5;
-        float targetY = floor(cursorY) + 0.5;
-        float sourceX = (null != agent.lastGoal) ? agent.lastGoal.location.x : agent.location.x;
-        float sourceY = (null != agent.lastGoal) ? agent.lastGoal.location.y : agent.location.y;
-        
-        
-        if (lineOfSight(targetX, targetY, sourceX, sourceY)) {
-          pushMatrix();
-          strokeWeight(0.1);
-          stroke(0, 255, 0); 
-          fill(64, 64, 64, 192); 
-          translate(targetX, targetY);
-          ellipseMode(CENTER);
-          ellipse(0, 0, 1, 1);
-          popMatrix();
-          
-          if (click) {
-            zoom = true;
-            MoveTo waypoint = new MoveTo();
-            waypoint.location.set(targetX, targetY);
-            agent.add(waypoint); 
-          }
-          
-        }
-        
-      }
-      
-    }
     
     popMatrix();
     
-    if (!radio.isModal() && zoom) {
+    // draw zoom bar
+    if (!radio.isModal()) {
       noStroke();
       fill(255);
       rect(width / 2 - 50, 0, 100, topMargin);
       stroke(0);
       fill(0);
       textAlign(CENTER);
-      text("ZOOM OUT", width / 2, 12);
+      text(zoom ? "ZOOM OUT" : "ZOOM IN", width / 2, 12);
     }
   }
   

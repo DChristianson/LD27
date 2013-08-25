@@ -2,8 +2,10 @@ class Radio {
   
   Message next = null;
   Message lastGoal = null;
-  float talkTime = 0;
   
+  float talkTime = 0;
+  float totalTalkTime = 0;
+ 
   public void setup() {
 
   }
@@ -31,6 +33,7 @@ class Radio {
     
     if (!next.modal) {
       talkTime += deltaTimeInSeconds;
+      totalTalkTime += deltaTimeInSeconds;
     }
     next.decrement(deltaTimeInSeconds);
     if (!(next.timeLeft > 0)) {
