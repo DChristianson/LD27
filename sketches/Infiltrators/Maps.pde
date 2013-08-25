@@ -23,7 +23,7 @@ public boolean playfieldLineOfSight(int[] playfield, int fromI, int fromJ, int t
   float i = fromI;
   float j = fromJ;
   
-  for (int n = 0; n < distance; n++) {
+  for (int n = 0; n <= distance; n++) {
     i = i + ddx;
     j = j + ddy;
     int idx = indexOf((int) i, (int) j);
@@ -48,6 +48,7 @@ public void setTile(int[] playfield, int i, int j, int tile) {
 }
 
 public int getTile(int[] playfield, int i, int j) {
+  if (i < 0 || i >= MAP_WIDTH || j < 0 || j >= MAP_HEIGHT) return TILE_WALL;
   return playfield[i + j * MAP_WIDTH];
 }
 
@@ -149,8 +150,6 @@ public void createMaze(int[] playfield) {
     while (!wallList.isEmpty()) {
       Wall wall = wallList.pop();
       
-      println("checking wall: " + wall.ci + "->" + wall.oi);
-      
       if (!visited[wall.oi]) {
     
         int left = tileAdd(wall.ci, -1, 0);
@@ -158,15 +157,15 @@ public void createMaze(int[] playfield) {
         int up = tileAdd(wall.ci, 0, -1);
         int down = tileAdd(wall.ci, 0, 1);
       
-        println(" " + playfield[up]);
-        println(playfield[left] + " " + playfield[right]);
-        println(" " + playfield[down]);
-
-        println(" " + visited[up]);
-        println(visited[left] + " " + visited[right]);
-        println(" " + visited[down]);
-   
-        println("digging");
+//        println(" " + playfield[up]);
+//        println(playfield[left] + " " + playfield[right]);
+//        println(" " + playfield[down]);
+//
+//        println(" " + visited[up]);
+//        println(visited[left] + " " + visited[right]);
+//        println(" " + visited[down]);
+//   
+//        println("digging");
         playfield[wall.ci] = TILE_EMPTY;
 
         visited[left] = true;

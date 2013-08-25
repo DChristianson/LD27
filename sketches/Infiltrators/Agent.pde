@@ -1,5 +1,5 @@
 class Agent {
- 
+  
   String name;
   PVector location = new PVector();  
   PVector velocity = new PVector();
@@ -51,8 +51,7 @@ class Agent {
       
     }
     
-    location.x += velocity.x * deltaTimeInSeconds;
-    location.y += velocity.y * deltaTimeInSeconds;
+    level.collide(location, velocity, 0.5, deltaTimeInSeconds);
         
   }
   
@@ -90,12 +89,15 @@ class Agent {
     pushMatrix();
     translate(location.x, location.y);
     rotate(heading);
+    
+    scale(0.5);
+    strokeWeight(0.1);
     stroke(255);
     fill(200);
     ellipseMode(CENTER);
-    ellipse(0, 0, 10, 10);
-    line(5, 5, 10, 0);
-    line(10, 0, 5, -5);
+    ellipse(0, 0, 1, 1);
+    line(.5, .5, 1, 0);
+    line(1, 0, .5, -.5);
     popMatrix(); 
     
     Goal goal = nextGoal;

@@ -33,7 +33,7 @@ class Radio {
       talkTime += deltaTimeInSeconds;
     }
     next.decrement(deltaTimeInSeconds);
-    if (!(next.timeLeft > 0) || (next.modal && click)) {
+    if (!(next.timeLeft > 0)) {
       next = next.next;
     }
     
@@ -44,14 +44,31 @@ class Radio {
   } 
   
   public void draw() {
-    stroke(255);
+    
+    // timer
     pushMatrix();
-    translate(width - 50, 0);
-    line(0, 0, 20, 20); 
-    line(0, 20, 20, 0); 
-    text(floor(talkTime), 0, 20);
-    popMatrix();
+    translate(width - 40, height - 40);
+    stroke(255, 255, 255, 200);
+    strokeWeight(2);
+    ellipseMode(CENTER);
+    ellipse(0, 0, 60, 60);
+    
+    // 10S MARK
+    rotate(- 2 * PI / 3);
+    stroke(255, 0, 0, 200);
+    line(0, 0, 0, 30);
 
+    // TALK TIME
+    rotate(talkTime * PI / 30f - PI / 3);
+    stroke(255, 255, 255, 200);
+    beginShape(TRIANGLES);
+    vertex(-1, 0);
+    vertex(0, 30);
+    vertex(1, 0);
+    endShape();
+
+
+    popMatrix();
 
     if (isActive()) {
       pushMatrix();

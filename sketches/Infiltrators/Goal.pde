@@ -21,17 +21,18 @@ class MoveTo extends Goal {
 
   public void draw() {
     pushMatrix();
-    translate(location.x - 5, location.y - 5);
+    translate(location.x, location.y);
     stroke(255);
     fill(200);
-    ellipse(0, 0, 10, 10);
+    ellipseMode(CENTER);
+    ellipse(0, 0, 1, 1);
     popMatrix();
   }
  
   public void execute(Agent agent, float deltaTimeInSeconds) {
     direction.set(location);
     direction.sub(agent.location);
-    if (direction.mag() < 5) {
+    if (direction.mag() < .5) {
       completed = true; 
       agent.velocity.mult(0);
       
@@ -48,13 +49,16 @@ class MoveTo extends Goal {
 class Tell extends Goal {
   
   String statement;
+  boolean showMap;
   
-  public Tell(String statement) {
+  public Tell(String statement, boolean showMap) {
+    this.location.set(agent.location); // KLUDGE
     this.statement = statement; 
+    this.showMap = showMap;
   }
   
   public void execute(Agent agent, float deltaTimeInSeconds) {
-    radio.add(new Message(statement, true));
+    radio.add(new Message(statement, true, !showMap));
     completed = true;
   }
   
@@ -65,11 +69,12 @@ class Ask extends Goal {
   String question;
   
   public Ask(String question) {
+    this.location.set(agent.location);// KLUDGE
     this.question = question; 
   }
   
   public void execute(Agent agent, float deltaTimeInSeconds) {
-    radio.add(new Message(question, false));
+    radio.add(new Message(question, false, false));
     completed = true;
   }
   
@@ -79,7 +84,7 @@ class Ask extends Goal {
     translate(agent.location.x, agent.location.y);
     stroke(0, 0, 255);
     noFill();
-    ellipse(0, 0, 20, 20);
+    ellipse(0, 0, 2, 2);
     popMatrix();
   }
   
@@ -90,15 +95,13 @@ class Wait extends Goal {
   float timeLeft;
   
   public Wait(float waitTime) {
+    this.location.set(agent.location); // KLUDGE
     this.timeLeft = waitTime; 
   }
   
   public void execute(Agent agent, float deltaTimeInSeconds) {
     if (!radio.isActive()) timeLeft -= deltaTimeInSeconds;
     completed = (timeLeft <= 0) || (next != null); // I've got a new goal
-    if (completed) {
-      println("done waiting");
-    }
   }
  
 }
@@ -109,7 +112,7 @@ class Wait extends Goal {
 class Breach extends Goal {
 
     public void execute(Agent agent, float deltaTimeInSeconds) {
-      completed = location.dist(agent.location) < 5;
+      completed = location.dist(agent.location) < .5;
     }
 
     public String getDescription() {
@@ -122,7 +125,7 @@ class Breach extends Goal {
       translate(location.x, location.y);
       stroke(0, 255, 0);
       noFill();
-      ellipse(0, 0, 20, 20);
+      ellipse(0, 0, 2, 2);
       popMatrix();
     }
 
@@ -134,20 +137,20 @@ class Breach extends Goal {
 class Exit extends Goal {
   
     public void execute(Agent agent, float deltaTimeInSeconds) {
-      completed = location.dist(agent.location) < 5;
+      completed = location.dist(agent.location) < .5;
     }
   
     public String getDescription() {
       return "Get to the exit"; 
     }
   
-      public void draw() {
+    public void draw() {
       pushMatrix();
       ellipseMode(CENTER);
       translate(location.x, location.y);
       stroke(255, 0, 0);
       noFill();
-      ellipse(0, 0, 20, 20);
+      ellipse(0, 0, 2, 2);
       popMatrix();
     }
 

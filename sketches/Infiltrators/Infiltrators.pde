@@ -3,7 +3,6 @@ import java.util.*;
 
 int MAP_WIDTH = 64;
 int MAP_HEIGHT = 32;
-int MAP_SCALE = 10;
 
 int TILE_EMPTY = 0;
 int TILE_WALL = 1;
@@ -30,7 +29,7 @@ Screen screen;
 
 public void setup() {
  
- size(800, 450, P2D); 
+ size(800, 400, P2D); 
  
  bootup = new Bootup();
  bootup.setup();
