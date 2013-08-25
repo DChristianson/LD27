@@ -1,5 +1,7 @@
 
-int MAP_WIDTH = 32;
+import java.util.*;
+
+int MAP_WIDTH = 64;
 int MAP_HEIGHT = 32;
 int MAP_SCALE = 10;
 
@@ -8,8 +10,10 @@ int TILE_WALL = 1;
 int TILE_ENTRANCE = 2;
 int TILE_EXIT = 3;
 
-int AGENTS_NORMAL = 3;
 float MAX_TALK_TIME = 10;
+float MESSAGE_TIME = 2;
+float WAIT_TIME = 10;
+int MAX_GOALS = 7;
 
 long lastMillis = 0;
 
@@ -17,6 +21,10 @@ Bootup bootup;
 Attract attract;
 Game game;
 Credits credits;
+Level level;
+Radio radio;
+Agent agent;
+
 
 Screen screen;
 

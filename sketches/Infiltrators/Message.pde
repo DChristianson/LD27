@@ -8,7 +8,7 @@ class Message {
   public Message(String text, boolean modal) {
     this.text = text;
     this.modal = modal;
-    this.timeLeft = MAX_TALK_TIME;
+    this.timeLeft = MESSAGE_TIME;
   }
  
   public void decrement(float deltaTimeInSeconds) {

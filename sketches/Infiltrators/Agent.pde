@@ -1,31 +1,115 @@
 class Agent {
  
   String name;
-  PVector location;
+  PVector location = new PVector();  
+  PVector velocity = new PVector();
+  float heading = 0;
+  float patience = 75;
 
-//  Goal next;
-//  Goal last;
-//  
+  Goal nextMissionGoal;
+  Goal lastMissionGoal;
+  
+  int numGoals = 0;
+  Goal nextGoal;
+  Goal lastGoal;
+  
   public void setup() {
     name = "Agent " + ((int) random(100));
-    location = new PVector();   
   }
   
   public void update(float deltaTimeInSeconds) {
-//    if (null == next) {
-////      add(new Ask("Where to?");
-//      
-//    }
+
+    // check mission goals
+    if (null != nextMissionGoal) {
+      nextMissionGoal.execute(this, deltaTimeInSeconds);
+      if (nextMissionGoal.completed) {
+        nextMissionGoal = nextMissionGoal.next;
+        if (null == nextMissionGoal) {
+          lastMissionGoal = null;
+        } 
+      }
+    }
+
+    // execute current sub goal
+    if (null != nextGoal) {
+      nextGoal.execute(this, deltaTimeInSeconds);  
+      if (nextGoal.completed) {
+        nextGoal = nextGoal.next;
+        numGoals--;
+        if (null == nextGoal) {
+          lastGoal = null;
+        }  
+      }
+      
+    } else if (null != nextMissionGoal) {
+      // need a new sub goal
+      if (random(100) > patience) {
+        add(new Ask("Show me where to go next."));       
+      }
+      patience = constrain(patience - 10, 25, 100);
+      add(new Wait(WAIT_TIME));
+      
+    }
     
+    location.x += velocity.x * deltaTimeInSeconds;
+    location.y += velocity.y * deltaTimeInSeconds;
+        
+  }
+  
+  public void addMission(Goal goal) {
+    if (null == lastMissionGoal) {
+      nextMissionGoal = goal;  
+    } else {
+      lastMissionGoal.next = goal; 
+    }
+    lastMissionGoal = goal;
+    goal.next = null;
+  }
+ 
+  public void add(Goal goal) {
+    if (MAX_GOALS == numGoals) {
+      return; 
+    }
+    if (null == lastGoal) {
+      nextGoal = goal;  
+    } else {
+      lastGoal.next = goal; 
+    }
+    lastGoal = goal;
+    goal.next = null;
+    numGoals++;
+  }
+  
+  public void clear() {
+    numGoals = 0;
+    nextGoal = null;
+    lastGoal = null; 
   }
   
   public void draw() {
     pushMatrix();
     translate(location.x, location.y);
+    rotate(heading);
     stroke(255);
     fill(200);
-    rect(0, 0, 10, 10);
+    ellipseMode(CENTER);
+    ellipse(0, 0, 10, 10);
+    line(5, 5, 10, 0);
+    line(10, 0, 5, -5);
     popMatrix(); 
+    
+    Goal goal = nextGoal;
+    while (null != goal) {
+      goal.draw();
+      goal = goal.next;
+    }
+
+    Goal missionGoal = nextMissionGoal;
+    while (null != missionGoal) {
+      missionGoal.draw();
+      missionGoal = missionGoal.next;
+    }
+    
   }
   
 }

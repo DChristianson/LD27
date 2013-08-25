@@ -8,11 +8,23 @@ class Bootup extends Screen {
     if (null == attract) {
       attract = new Attract();
       attract.setup();
-      percent = 33;
+      percent = 10;
     } else if (null == game) {
       game = new Game();
       game.setup();     
-      percent = 66;
+      percent = 20;
+    } else if (null == level) {
+      level = new Level();
+      level.setup();
+      percent = 40;
+    } else if (null == radio) {
+      radio = new Radio();
+      radio.setup();
+      percent = 60;
+    } else if (null == agent) {
+      agent = new Agent();
+      agent.setup();
+      percent = 80;
     } else if (null == credits) {
       credits = new Credits();
       credits.setup(); 
