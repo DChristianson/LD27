@@ -11,7 +11,7 @@ public void generateMap(int[] playfield, int number) {
 /**
  * check line of sight
  */
-public boolean playfieldLineOfSight(int[] playfield, int fromI, int fromJ, int toI, int toJ) {
+public boolean playfieldLineOfSight(int[] playfield, int fromI, int fromJ, int toI, int toJ, PVector direction) {
   
   float dx = toI - fromI;
   float dy = toJ - fromJ;
@@ -30,6 +30,11 @@ public boolean playfieldLineOfSight(int[] playfield, int fromI, int fromJ, int t
     if (TILE_WALL == playfield[idx]) {
       return false; 
     }
+  }
+  
+  if (null != direction) {
+    direction.x = dx;
+    direction.y = dy;
   }
   
   return true;
@@ -63,6 +68,15 @@ public int findTile(int[] playfield, int tile, int offset) {
     }
   }
   return -1;
+}
+
+public int findRandomTile(int[] playfield, int tile) {
+  while (true) {
+    int idx = (int) random(playfield.length);
+    if (tile == playfield[idx]) {
+      return idx; 
+    }
+  }
 }
 
 /**
@@ -110,6 +124,12 @@ public boolean inBounds(int idx) {
   int j = (int) idx / MAP_WIDTH;
   int i = idx - j * MAP_WIDTH;
   return 0 < i && MAP_WIDTH - 1 > i && 0 < j &&  MAP_HEIGHT - 1 > j;
+}
+
+public boolean onMap(int idx) {
+  int j = (int) idx / MAP_WIDTH;
+  int i = idx - j * MAP_WIDTH;
+  return 0 <= i && MAP_WIDTH > i && 0 <= j &&  MAP_HEIGHT > j;
 }
 
 public void addRandomWall(Stack<Wall> s, Wall w) {

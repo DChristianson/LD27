@@ -1,7 +1,7 @@
 class Game extends Screen {
 
   boolean gameOver = false; 
-  boolean overLimit = false;
+  boolean overLimit = true;
   int missionNumber = 0;
   float totalPlayTime = 0;  
   
@@ -10,6 +10,8 @@ class Game extends Screen {
   public void restart() {
     gameOver = false;
     missionNumber = 0;
+    agent.clearMission();
+    guard.clearMission();
   }
   
   public void nextLevel() {
@@ -20,8 +22,10 @@ class Game extends Screen {
     agent.clear();
     agent.velocity.mult(0);
     agent.active = true;
+    agent.alive = true;
     guard.clear();
     guard.velocity.mult(0);
+    guard.active = false;
     guard.active = false;
     
     // find level start and put agent there
@@ -31,7 +35,12 @@ class Game extends Screen {
     Breach breach = new Breach();
     breach.location.set(agent.location.x, agent.location.y);
     agent.addMission(breach);
-        
+            
+    // mission parameters: exit level
+    Exit exit = new Exit();
+    level.find(TILE_EXIT, exit.location);
+    // don't add exit goal yet
+    
     if (1 == missionNumber) {
       
       agent.add(new Tell("This is " + agent.name + ". I've just infiltrated the compound.", false));
@@ -44,8 +53,8 @@ class Game extends Screen {
 
       guard.location.set(agent.location);
       guard.active = false;
-
-            
+      level.levelColor = color(64, 64, 128, 192);
+     
     } else if (2 == missionNumber) {
 
       agent.add(new Tell("Made it.", false));
@@ -60,6 +69,8 @@ class Game extends Screen {
       
       guard.location.set(terminal.location);
       guard.active = true;
+      level.levelColor = color(128, 64, 128, 192);
+
       
     } else if (3 == missionNumber) {
       
@@ -68,7 +79,8 @@ class Game extends Screen {
       agent.add(new Tell("I don't see any guards so this should be super easy.", true));
       agent.add(new Tell("Let's do this.", false));
       
-      guard.location.set(agent.location);
+      // be mean and put guard at exit
+      guard.location.set(exit.location);
       guard.active = false;
       
       Suitcase suitcase = new Suitcase();
@@ -76,12 +88,10 @@ class Game extends Screen {
       setTile(level.playfield, (int) suitcase.location.x, (int) suitcase.location.y, TILE_EMPTY);
       agent.addMission(suitcase);      
       
+      level.levelColor = color(64, 128, 128, 192);
+
     }
 
-    // mission parameters: exit level
-    Exit exit = new Exit();
-    level.find(TILE_EXIT, exit.location);
-    exit.location.y += 1;
     agent.addMission(exit);
 
     agent.add(new Wait(WAIT_TIME));
@@ -102,14 +112,12 @@ class Game extends Screen {
     }
 
     if (agent.active && guard.active) {
-      boolean hasLos = level.lineOfSight(agent.location.x, agent.location.y, guard.location.x, guard.location.y); 
-      println("line of sight:" + hasLos);
+      PVector losDir = new PVector();
+      boolean hasLos = playfieldLineOfSight(level.playfield, (int) agent.location.x, (int) agent.location.y, (int) guard.location.x, (int) guard.location.y, losDir); 
+      float losHeading = losDir.heading();
       if (hasLos) {
-        && null != agent.nextGoal) {
-        agent.nextGoal.seesOpponent(guard); 
-      }
-      if (hasLos && null != guard.nextGoal) {
-        guard.nextGoal.seesOpponent(agent);
+        agent.seesOpponent(guard, losHeading); 
+        guard.seesOpponent(agent, -losHeading);
       }
     }
     
@@ -128,20 +136,47 @@ class Game extends Screen {
       
       // agent should do this
       agent.clear();
-      agent.add(new Tell("We've keep radio communication open too long, guards are alerted.", true));
+      agent.add(new Tell("We've used the radio too much, the guards are alerted.", false));
+      agent.add(new Tell("I've either got to take the guard down with an ambush or evade capture long enough to get to the exit.", true));
+      agent.add(new Tell("Your call.", false));
       
       // activate guard 
+      guard.hunt(agent);
+      
+    } else if (!guard.alive && null == guard.nextGoal) {
+      
+      radio.reset();
+      level.find(TILE_ENTRANCE, guard.location);
+      guard.active = false;
+      guard.alive = true;
+      
+      
+    } else if (!agent.alive && agent.timeSpentDead > 5) {
+      gameOver = true;
+      
+    } else if (agent.cumWeight > MAX_WEIGHT) {
+      // cognitive overload
+      agent.clear();
+      agent.add(new Ask("Whoa, I'm getting confused here. Too many turns. Keep it simple, okay?"));
+      
+    }
+    
+    if (key == 'q') {
+      // quit
+      gameOver = true;
+      key = 0;
+      
+    } else if (key == 'g') {
+      // call guard
       Path seek = searchPathTree(level.playfield, (int) guard.location.x, (int) guard.location.y, (int) agent.location.x, (int) agent.location.y, 1000);
       guard.clear();
       guard.add(new Follow(seek));
       guard.active = true;
+      guard.alive = true;
+      key = 0;
       
-    }
+    }    
     
-    if (key == 'Q') {
-      gameOver = true;
-      key=0;
-    }
   }
   
   public void draw() {

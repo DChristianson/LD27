@@ -13,6 +13,7 @@ class Level {
   float scale = 50;
   float cursorX;
   float cursorY;
+  int levelColor = color(64, 64, 128, 192);
   Path path;
   boolean zoom = false;
   
@@ -58,12 +59,12 @@ class Level {
     return true;
   }
   
-  public boolean lineOfSight(float fromX, float fromY, float toX, float toY) {
-    int fromI = (int) (fromX);
-    int fromJ = (int) (fromY);
-    int toI = (int) (toX);
-    int toJ = (int) (toY);
-    return playfieldLineOfSight(playfield, fromI, fromJ, toI, toJ); 
+  public void random(int tile, PVector location) {
+    int idx = findRandomTile(playfield, tile);
+    int j = floor(idx / MAP_WIDTH);
+    int i = idx - (j * MAP_WIDTH);
+    location.x = i + 0.5;
+    location.y = j + 0.5;
   }
   
   public void collide(PVector location, PVector velocity, float radius, float deltaTimeInSeconds) {
@@ -114,12 +115,40 @@ class Level {
         float targetY = floor(cursorY) + 0.5;
         float sourceX = (null != agent.lastGoal) ? agent.lastGoal.location.x : agent.location.x;
         float sourceY = (null != agent.lastGoal) ? agent.lastGoal.location.y : agent.location.y;
-        
-        path = searchPathTree(playfield, (int) sourceX, (int) sourceY, (int) targetX, (int) targetY, 20);
 
-        if (null != path && click) {
-          Follow follow = new Follow(path);
-          agent.add(follow); 
+        if (!dragging) {
+          
+          path = searchPathTree(playfield, (int) sourceX, (int) sourceY, (int) targetX, (int) targetY, 20);
+  
+          if (null != path && click) {
+            // go to path
+            Follow follow = new Follow(path);
+            agent.add(follow); 
+            if (radio.isOverLimit()) {
+              guard.hunt(agent); 
+            }
+          }
+          
+        } else {
+
+          float hideX = (dragVector.x - left) / scale;
+          float hideY = (dragVector.y - top) / scale;
+          
+          
+          path = searchPathTree(playfield, (int) sourceX, (int) sourceY, (int) hideX, (int) hideY, 20);
+  
+          if (null != path && dragClick) {
+            // go to hide spot and set up ambush
+            Follow follow = new Follow(path);
+            agent.add(follow);
+            Ambush ambush = new Ambush();
+            ambush.location.set(targetX, targetY);
+            agent.add(ambush); 
+            if (radio.isOverLimit()) {
+              guard.hunt(agent); 
+            }
+          }
+          
         }
 
     }  
@@ -152,7 +181,7 @@ class Level {
 
     // draw floors
     noStroke();
-    fill(64, 64, 128, 192);
+    fill(levelColor);
     
     for (int i = 0; i < MAP_WIDTH; i++) {
       for (int j = 0; j < MAP_HEIGHT; j++) {
@@ -207,6 +236,16 @@ class Level {
       textAlign(CENTER);
       text(zoom ? "ZOOM OUT" : "ZOOM IN", width / 2, 12);
     }
+    
+    // heading pointer
+    if (dragging) {
+      strokeWeight(1);
+      stroke(255, 0, 0);
+      line(dragVector.x, dragVector.y, mouseX, mouseY); 
+    }
+    
   }
+  
+
   
 }

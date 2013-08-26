@@ -16,19 +16,19 @@ public Path searchPathTree(int[] playfield, int fromI, int fromJ, int toI, int t
     visited[idx] = true;
     
     int left = tileAdd(idx, -1, 0);
-    if (inBounds(left) && !visited[left] && TILE_WALL != playfield[left]) {
+    if (onMap(left) && !visited[left] && TILE_WALL != playfield[left]) {
       paths.add(new Path(root, root.i - 1, root.j, toI, toJ));  
     }
     int right = tileAdd(idx, 1, 0);
-    if (inBounds(right) && !visited[right] && TILE_WALL != playfield[right]) {
+    if (onMap(right) && !visited[right] && TILE_WALL != playfield[right]) {
       paths.add(new Path(root, root.i + 1, root.j, toI, toJ));  
     }
     int up = tileAdd(idx, 0, -1);
-    if (inBounds(up) && !visited[up] && TILE_WALL != playfield[up]) {
+    if (onMap(up) && !visited[up] && TILE_WALL != playfield[up]) {
       paths.add(new Path(root, root.i, root.j - 1, toI, toJ));  
     }
     int down = tileAdd(idx, 0, 1);
-    if (inBounds(down) && !visited[down] && TILE_WALL != playfield[down]) {
+    if (onMap(down) && !visited[down] && TILE_WALL != playfield[down]) {
       paths.add(new Path(root, root.i, root.j + 1, toI, toJ));  
     }
     
@@ -83,6 +83,24 @@ class Path implements Comparable<Path> {
  
  public int hashCode() {
    return indexOf(i, j);  
+ }
+ 
+ public int getNumTurns() {
+   int turns = 0;
+   Path r = this;
+   int di = 0;
+   int dj = 0;
+   while (null != r.child) {
+     int ndi = r.i - r.child.i;
+     int ndj = r.j - r.child.j;
+     if (di - ndi != 0 || dj - ndj != 0) {
+       turns++; 
+     }
+     di = ndi;
+     dj = ndj;
+     r = r.child;
+   }
+   return turns;
  }
  
  public Path getEnd() {

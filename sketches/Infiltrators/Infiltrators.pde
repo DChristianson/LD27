@@ -12,7 +12,7 @@ int TILE_EXIT = 3;
 float MAX_TALK_TIME = 10;
 float MESSAGE_TIME = 2;
 float WAIT_TIME = 10;
-int MAX_GOALS = 7;
+int MAX_WEIGHT = 15;
 
 long lastMillis = 0;
 
@@ -57,13 +57,34 @@ public void draw() {
   
   // clear input
   click = false;
+  dragClick = false;
   
 }
 
+PVector dragVector = new PVector();
+long dragMillis = 0;;
+boolean dragging = false;
+boolean dragClick = false;
 boolean click = false;
 
+public void mousePressed() {
+  dragMillis = millis();
+  dragVector.x = mouseX;
+  dragVector.y = mouseY;
+  dragging = false;
+}
+
 public void mouseReleased() {
+  if (dragging) {
+    dragClick = true;
+  }
+  dragging = false;
   click = true; 
 }
 
+public void mouseDragged() {
+  if ((millis() - dragMillis) > 1000) {
+    dragging = true;
+  }
+}
 

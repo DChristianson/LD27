@@ -2,20 +2,20 @@ class Goal {
 
   PVector location = new PVector();
   boolean completed = false;
+  int weight = 0;
   
   Goal next; 
     
   public void execute(Agent agent, float deltaTimeInSeconds) {}
-  
-  public void seesOpponent(Agent agent) {
-    float("sees opponent");  
-  }
+
+  public void seesOpponent(Agent agent, Agent opponent) {}
 
   public void draw() {}
 
   public String getDescription() {
     return null;
   }
+  
     
 }
 
@@ -59,8 +59,15 @@ class Follow extends MoveTo {
   
   public Follow(Path path) {
     this.path = path;
+    this.weight = path.getNumTurns();
     Path end = path.getEnd();
     location.set(end.i + 0.5, end.j + 0.5);
+  }
+  
+  public void seesOpponent(Agent agent, Agent other) {
+    agent.clear();
+    agent.add(new Fight(other));
+    agent.nextGoal.seesOpponent(agent, other);
   }
   
   public void draw() {
@@ -102,11 +109,179 @@ class Follow extends MoveTo {
       }
       
     } else {      
-      direction.normalize();
-      direction.mult(2.0);
+      direction.setMag(2.0);
       agent.velocity.set(direction);
       agent.heading = agent.velocity.heading();  
       
+    }
+  }
+  
+}
+
+class Fight extends MoveTo {
+  
+  float fightTime = 0;
+  float warmUp = 0;
+  Agent opponent;
+  PVector lastSeenAt = new PVector();
+  boolean shooting = false;
+  
+  public Fight(Agent opponent) {
+    this.opponent = opponent;
+  }  
+  
+  public void seesOpponent(Agent agent, Agent other) {
+    if (opponent != other) return;
+    lastSeenAt.set(other.location);
+  }
+  
+  public void execute(Agent agent, float deltaTimeInSeconds) {
+    // kludge
+    location.set(agent.location);
+    
+    // fight until win
+    if (!opponent.alive) {
+      agent.alert = false;
+      completed = true;
+      return; 
+    }
+    
+    // keep fighting
+    fightTime += deltaTimeInSeconds;
+    warmUp += deltaTimeInSeconds;
+    
+    agent.alert = true;
+    boolean los = playfieldLineOfSight(level.playfield, (int) agent.location.x, (int) agent.location.y, (int) lastSeenAt.x, (int) lastSeenAt.y, direction);
+    float distance = direction.mag();
+    if (distance < 1) {
+      if (fightTime > 1 && random(100) > 50) {
+        fightTime = 0;
+        
+        // struggle for a bit then execute throw for knockout
+        direction.fromAngle(random(TWO_PI));
+        direction.setMag(3.0);
+        opponent.clear();
+        opponent.velocity.set(direction);
+        opponent.add(new Knockout());
+        
+      }
+      
+    } else {
+
+      // shooting and dodging
+      shooting = false;
+      
+      // Kludgey circle strafe
+      agent.heading = direction.heading();
+      direction.rotate(sin(fightTime) > 0 ? HALF_PI : - HALF_PI);
+      direction.setMag(2.0);
+      agent.velocity.set(direction);
+
+      if (warmUp > 0.5 && warmUp < 1.0 && random(100) > 50 && los) {
+          shooting = true;
+          opponent.clear();
+          opponent.velocity.set(direction);
+          opponent.add(new Knockout());
+          
+      } else if (warmUp >= 1.0) {
+          warmUp = 0;
+          shooting = false; 
+          
+      }
+      
+    }
+    
+  }
+  
+  public void draw() {
+    
+    if (shooting) {
+      // more bad last minute kludges to get gunpoint
+      direction.set(lastSeenAt);
+      direction.sub(location);
+      direction.setMag(0.6);
+      
+      strokeWeight(0.1);
+      stroke(255, 0, 255, 192 * cos(warmUp));
+      line(location.x + direction.x, location.y + direction.y, lastSeenAt.x, lastSeenAt.y);
+    }
+    
+  }
+  
+}
+
+class Takedown extends Fight {
+  
+  float takedownTime = 0;
+
+  public Takedown(Agent opponent) {
+    super(opponent);
+  }  
+
+  public void execute(Agent agent, float deltaTimeInSeconds) {
+    if (!opponent.alive) {
+      agent.alert = false;
+      completed = true;
+      return; 
+    }
+    
+    takedownTime += deltaTimeInSeconds;
+    
+    if (takedownTime > 3) {
+      agent.alert = false;
+      completed = true;
+      return; 
+    }
+    
+    direction.set(lastSeenAt);
+    direction.sub(agent.location);
+    float distance = direction.mag();
+    if (distance < 1) {
+      agent.alert = true;
+      
+      // try to take down
+      opponent.clear();
+      opponent.add(new Knockout());
+      
+    } else {
+      agent.alert = false;
+
+      // quickly move towards
+      direction.set(lastSeenAt);
+      direction.sub(agent.location);
+      direction.setMag(3);
+      agent.heading = direction.heading();
+      agent.velocity.set(direction);
+      
+    }
+  }
+  
+}
+
+class Knockout extends Goal {
+
+  float knockoutTime = 0;
+  public void execute(Agent agent, float deltaTimeInSeconds) {
+      agent.alert = false;
+      agent.alive = false;
+      knockoutTime  += deltaTimeInSeconds;
+      if (knockoutTime > 5) {
+        completed = true;
+      }
+  }
+  
+}
+class Ambush extends Goal {
+
+  public Ambush() {}
+  
+  public void execute(Agent agent, float deltaTimeInSeconds) {
+    println("ambush mode");
+    float distance = agent.location.dist(guard.location);
+    if (distance < 1) {
+      println("super awesome takedown!"); 
+    } else {
+      println("waiting for ambush");
     }
   }
   
@@ -247,6 +422,10 @@ class Suitcase extends Goal {
 
     public void execute(Agent agent, float deltaTimeInSeconds) {
       completed = location.dist(agent.location) < .1;
+      if (completed && !guard.active) {
+        // send the guard out
+        guard.hunt(agent);  
+      }
     }
 
     public String getDescription() {
