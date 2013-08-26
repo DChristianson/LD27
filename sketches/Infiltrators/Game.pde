@@ -1,5 +1,6 @@
 class Game extends Screen {
 
+  int doOvers = MAX_DO_OVERS;
   boolean gameOver = false; 
   boolean overLimit = true;
   int missionNumber = 0;
@@ -10,19 +11,20 @@ class Game extends Screen {
   public void restart() {
     gameOver = false;
     missionNumber = 0;
-    agent.clearMission();
-    guard.clearMission();
   }
   
   public void nextLevel() {
     
     level.initMap(missionNumber); 
     radio.reset();
+    doOvers = MAX_DO_OVERS;
     overLimit = false;
+    agent.clearMission();
     agent.clear();
     agent.velocity.mult(0);
     agent.active = true;
     agent.alive = true;
+    guard.clearMission();
     guard.clear();
     guard.velocity.mult(0);
     guard.active = false;
@@ -152,7 +154,12 @@ class Game extends Screen {
       
       
     } else if (!agent.alive && agent.timeSpentDead > 5) {
-      gameOver = true;
+      doOvers--;
+      if (doOvers <= 0) {
+        gameOver = true;
+      } else {
+        nextLevel();
+      }
       
     } else if (agent.cumWeight > MAX_WEIGHT) {
       // cognitive overload

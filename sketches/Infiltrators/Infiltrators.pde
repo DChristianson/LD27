@@ -13,6 +13,7 @@ float MAX_TALK_TIME = 10;
 float MESSAGE_TIME = 2;
 float WAIT_TIME = 10;
 int MAX_WEIGHT = 15;
+int MAX_DO_OVERS = 3;
 
 long lastMillis = 0;
 
