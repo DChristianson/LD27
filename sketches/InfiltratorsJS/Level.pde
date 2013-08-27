@@ -10,7 +10,7 @@ class Level {
   float topMargin = 15;
   float rightMargin = 15;
   float bottomMargin = 15;
-  float scale = 50;
+  float levelScale = 50;
   float cursorX;
   float cursorY;
   int levelColor = color(64, 64, 128, 192);
@@ -20,12 +20,9 @@ class Level {
   int[] playfield;
   float[] activityLevels;
   
-  PShader wallsF;
-  
   public void setup() {
     
     playfield = new int[MAP_WIDTH * MAP_HEIGHT];
-    wallsF = loadShader("edges.glsl");
     
     resize(MAP_WIDTH, MAP_HEIGHT);
     
@@ -33,13 +30,13 @@ class Level {
   
   public void resize(float x, float y) {
     
-    scale = lerp(scale, zoom ? 50 : ((height - (topMargin + bottomMargin)) / MAP_HEIGHT), 0.1);
+    levelScale = lerp(levelScale, zoom ? 50 : ((height - (topMargin + bottomMargin)) / MAP_HEIGHT), 0.1);
 
-    w = MAP_WIDTH * scale;
-    h = MAP_HEIGHT * scale;    
+    w = MAP_WIDTH * levelScale;
+    h = MAP_HEIGHT * levelScale;    
                 
-    left = lerp(constrain((width / 2) - x * scale, width - rightMargin - w, leftMargin), left, 0.1);
-    top = lerp(constrain((height / 2) - y * scale, height - bottomMargin - h, topMargin), top, 0.1);
+    left = lerp(constrain((width / 2) - x * levelScale, width - rightMargin - w, leftMargin), left, 0.1);
+    top = lerp(constrain((height / 2) - y * levelScale, height - bottomMargin - h, topMargin), top, 0.1);
     bottom = top + h;
     right = left + w;
     
@@ -70,19 +67,19 @@ class Level {
   public void collide(PVector location, PVector velocity, float radius, float deltaTimeInSeconds) {
     float lx = location.x + velocity.x * deltaTimeInSeconds;
     float ly = location.y + velocity.y * deltaTimeInSeconds;
-    if (TILE_WALL == getTile(playfield, (int) (lx - radius), (int) ly)) {
+    if (TILE_WALL == getTile(playfield, floor((lx - radius)), floor(ly))) {
       lx = ceil(lx - 1) + radius;
        
     }
-    if (TILE_WALL == getTile(playfield, (int) (lx + radius), (int) ly)) {
+    if (TILE_WALL == getTile(playfield, floor((lx + radius)), floor(ly))) {
       lx = floor(lx + 1) - radius;
 
     }
-    if (TILE_WALL == getTile(playfield, (int) lx, (int) (ly - radius))) {
+    if (TILE_WALL == getTile(playfield, floor(lx), floor((ly - radius)))) {
       ly = ceil(ly - 1) + radius;
        
     }
-    if (TILE_WALL == getTile(playfield, (int) lx, (int) (ly + radius))) {
+    if (TILE_WALL == getTile(playfield, floor(lx), floor((ly + radius)))) {
       ly = floor(ly + 1) - radius;
       
     }
@@ -91,7 +88,7 @@ class Level {
   }
   
   public void update(float deltaTimeInSeconds) {
-    
+  
     if (radio.isModal()) {
       
       // zoom by radio focus
@@ -101,8 +98,8 @@ class Level {
           
     resize(agent.location.x, agent.location.y);
 
-    cursorX = (mouseX - left) / scale;
-    cursorY = (mouseY - top) / scale;
+    cursorX = (mouseX - left) / levelScale;
+    cursorY = (mouseY - top) / levelScale;
          
     if (!radio.isModal() && mouseX > (width / 2 - 50) && mouseX < (width / 2 + 50) && mouseY < topMargin && click) {
       
@@ -118,7 +115,7 @@ class Level {
 
         if (!dragging && !dragClick) {
           
-          path = searchPathTree(playfield, (int) sourceX, (int) sourceY, (int) targetX, (int) targetY, 20);
+          path = searchPathTree(playfield, floor(sourceX), floor(sourceY), floor(targetX), floor(targetY), 20);
   
           if (null != path && click) {
             // go to path
@@ -131,18 +128,18 @@ class Level {
           
         } else {
 
-          float hideX = (dragVector.x - left) / scale;
-          float hideY = (dragVector.y - top) / scale;
+          float hideX = (dragVector.x - left) / levelScale;
+          float hideY = (dragVector.y - top) / levelScale;
           
           
-          path = searchPathTree(playfield, (int) sourceX, (int) sourceY, (int) hideX, (int) hideY, 20);
+          path = searchPathTree(playfield, floor(sourceX), floor(sourceY), floor(hideX), floor(hideY), 20);
   
           if (null != path && dragClick) {
             // go to hide spot and set up ambush
             Follow follow = new Follow(path);
             agent.add(follow);
             Ambush ambush = new Ambush();
-            ambush.location.set(targetX, targetY);
+            ambush.location.set(targetX, targetY, 0);
             agent.add(ambush); 
             if (radio.isOverLimit()) {
               guard.hunt(agent); 
@@ -159,7 +156,7 @@ class Level {
     pushMatrix();     
     
     translate(left, top);    
-    scale(scale);
+    scale(levelScale);
     // draw corridors
     
     noStroke();
@@ -176,9 +173,6 @@ class Level {
       }
     }
     
-    // execute walls filter
-    filter(wallsF);
-
     // draw floors
     noStroke();
     fill(levelColor);

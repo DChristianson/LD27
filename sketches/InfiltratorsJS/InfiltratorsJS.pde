@@ -1,5 +1,5 @@
 
-import java.util.*;
+PVector HEADING = new PVector(1, 0); 
 
 int MAP_WIDTH = 64;
 int MAP_HEIGHT = 32;
